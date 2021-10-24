@@ -2,7 +2,7 @@
 #  配置cabbler
 
 - name: 生生成root用户密码
-  shell: openssl passwd -1 -salt hLGoLIZR $ROOT_PASSWORD
+  shell: openssl passwd -1 -salt hLGoLIZR {{ ROOT_PASSWORD }}
   register: root_password
   tags: root_password
 
