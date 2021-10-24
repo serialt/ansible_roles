@@ -1,0 +1,65 @@
+
+- name: uninstall zabbix-agent if installed.
+  apt:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - zabbix-agent
+    - zabbix-release
+  ignore_errors: True
+
+- name: configure apt aource for debian family.
+  shell: wget {{ zabbix_repo_url }}/zabbix/zabbix/{{ zabbix_agent_version }}/{{ ansible_distribution | lower}}/pool/main/z/zabbix-release/zabbix-release_{{ zabbix_agent_version }}-1+{{ ansible_distribution_release }}_all.deb
+  args:
+    chdir: /tmp
+
+- name: install zabbix for debian family.
+  shell: dpkg -i zabbix-release_{{ zabbix_agent_version }}-1+{{ ansible_distribution_release }}_all.deb
+  args:
+    chdir: /tmp
+
+- name: chage apt source to tsinghua.
+  shell: sed -ri "s#http://repo.zabbix.com#{{ zabbix_repo_url }}/zabbix#g"  zabbix.list
+  args:
+    chdir: /etc/apt/sources.list.d
+
+- name: update apt source.
+  shell: apt update
+
+- name: clear deb package.
+  file:
+    name: zabbix-release_{{ zabbix_agent_version }}-1+{{ ansible_distribution_release }}_all.deb
+    state: absent
+
+
+- name: install zabbix-agent.
+  apt:
+    name: zabbix-agent
+    state: present
+
+- name: configure zabbix-agent for zabbix-server.
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: '^Server=127.0.0.1'
+    line: "Server={{ zabbix_server }}"
+
+- name: configure zabbix-agent ServerActive for zabbix-server.
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: '^ServerActive=127.0.0.1'
+    line: "ServerActive={{ zabbix_server }}"
+
+- name: configure zabbix-agent hostname.
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: '^Hostname='
+    line: "Hostname={{ ansible_hostname }}"
+
+- name: start zabbix-agent.
+  systemd:
+    name: zabbix-agent
+    enabled: yes
+    state: restarted
+
+- debug:
+    msg: "zabbix agent配置完成"

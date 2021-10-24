@@ -1,0 +1,32 @@
+---
+# author: serialt
+
+
+zabbix_repo: https://mirrors.tuna.tsinghua.edu.cn
+zabbix_version: 5.0
+
+zabbix_listen_port: 8080
+zabbix_server_name: "zabbix.serialt.com"
+
+zabbix_timezone: "Asia/Shanghai"
+
+
+# 数据库配置
+zabbix_db: zabbix
+zabbix_db_host: 127.0.0.1
+zabbix_db_port: 3306
+zabbix_db_user: zabbix
+zabbix_db_password: centos
+
+
+
+
+
+
+
+
+
+
+
+
+

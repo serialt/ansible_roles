@@ -1,0 +1,45 @@
+---
+# author: serialt
+
+- name: Check if go is installed.
+  stat:
+    path: "{{ software_install_path }}"
+  register: go_install_result
+
+- fail:
+    msg: The {{ go_root }} is exited, Please check it !!! 
+  when: not go_install_result.stat.exists
+
+- name: Download go file.
+  get_url: 
+    url: "{{ go_file_url }}"
+    dest: "{{ software_files_path }}"
+  
+- name: Install go.
+  unarchive:
+    src: "{{ go_file_path }}"
+    dest: "{{ software_install_path }}/"
+    creates: "{{ software_install_path }}/go"
+
+- name: Create environment file.
+  shell: touch /etc/profile.d/go.sh
+  register: create_go_env_file
+
+- name: Config environment variable.
+  lineinfile: 
+    dest: /etc/profile.d/go.sh 
+    line: "{{ item }}"
+  with_items:
+    - "{{ go_proxy }}"
+    - "{{ go_root }}"
+    - "{{ go_env_path }}"
+    - "{{ go_path }}"
+
+- name: Go version.
+  command: "{{ software_install_path }}/go/bin/go version"
+  register: result
+  changed_when: false
+  ignore_errors: True
+
+- debug: 
+    var: result.stdout

@@ -1,0 +1,6 @@
+---
+# defaults file for serialt.git_server
+
+git_server_home: /home/git
+git_bare_repo_name: ['serialt']
+

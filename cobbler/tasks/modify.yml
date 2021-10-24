@@ -1,0 +1,48 @@
+---
+#  配置cabbler
+
+- name: 生生成root用户密码
+  shell: openssl passwd -1 -salt hLGoLIZR $ROOT_PASSWORD
+  register: root_password
+  tags: root_password
+
+
+- name: 修改server
+  shell: "sed -i s/^server: 127.0.0.1/server: {{ SERVER_IP }}/g  /etc/cobbler/settings"
+- name: 修改next_server
+  shell: "sed -i s/^next_server: 127.0.0.1/next_server: {{ SERVER_IP }}/g /etc/cobbler/settings"
+- name: 修改pxe_just_onece
+  shell: "sed -i s/pxe_just_once: 0/pxe_just_once: 1/g /etc/cobbler/settings"
+- name: 允许管理dhcp
+  shell: "sed -i 's/manage_dhcp: 0/manage_dhcp: 1/g' /etc/cobbler/settings"
+- name: 修改默认密码
+  shell: "sed -i s#^default_password.*#default_password_crypted: \"{{ root_password.stdout }}\"#g /etc/cobbler/settings "
+- name: 修改dpch
+  shell: "{{ item }}"
+  with_items:
+    - sed -i "s/192.168.1.0/$DHCP_SUBNET/" /etc/cobbler/dhcp.template
+    - sed -i "s/192.168.1.5/$DHCP_ROUTER/" /etc/cobbler/dhcp.template
+    - sed -i "s/192.168.1.1;/$DHCP_DNS;/" /etc/cobbler/dhcp.template
+    - sed -i "s/192.168.1.100 192.168.1.254/$DHCP_RANGE/" /etc/cobbler/dhcp.template
+
+- name: 配置httpd
+  shell: sed -i "s/^#ServerName www.example.com:80/ServerName localhost:80/" /etc/httpd/conf/httpd.conf
+
+- name: 配置xinetd
+  shell: "{{ item }}"
+  with_items:
+    - sed -i -e 's/= yes/= no/g' /etc/xinetd.d/rsync
+    - sed -i -e 's/= yes/= no/g' /etc/xinetd.d/tftp
+
+- name: 配置selinux
+  shell: "{{ item }}"
+  with_items:
+    - cp /usr/share/syslinux/pxelinux.0 /var/lib/cobbler/loaders/
+    - cp  /usr/share/syslinux/meminfo.c32  /var/lib/cobbler/loaders/
+
+- name: 适配debian
+  shell: "{{ item }}"
+  with_items:
+    - sed -i 's$@arches="i386"$#@arches="i386"$g' /etc/debmirror.conf
+    - sed  -i 's$@dists="sid"$#@dists="sid"$g' /etc/debmirror.conf
+

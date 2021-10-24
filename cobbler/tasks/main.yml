@@ -1,0 +1,8 @@
+---
+# tasks file for cobbler
+
+- include: base.yml
+
+- include: modify.yml
+
+- include: service.yml

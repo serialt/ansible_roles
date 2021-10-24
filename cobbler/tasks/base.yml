@@ -1,0 +1,48 @@
+- name: "安装阿里云yum源"
+  shell: curl -o /etc/yum.repos.d/aliyun.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+  tags: install_aliyun_yum
+
+- name: "修改阿里云yum源"
+  shell: "sed -i -e '/mirrors.cloud.aliyuncs.com/d' -e '/mirrors.aliyuncs.com/d' /etc/yum.repos.d/aliyun.repo"
+
+- name: "安装阿里云epel-relase"
+  yum_repository:
+    file: aliyun-epel
+    name: "epel"
+    description: "Extra Packages for Enterprise Linux 7 - $basearch"
+    baseurl: "http://mirrors.aliyun.com/epel/7/$basearchbasearch/stable"
+    gpgkey: "https://mirrors.aliyun.com/epel/RPM-GPG-KEY-EPEL-7"
+    gpgcheck: yes
+    enabled: yes
+  tags: install_aliyun-epel
+
+- name: 关闭selinux
+  selinux:
+    state: disabled 
+  tags: disable_selinux
+  ignore_errors: yes
+
+- name: 停止selinux
+  shell: setenforce 0
+  tags: stop_slinux
+  ignore_errors: yes
+
+- name: "安装cobbler及相关软件"
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - cobbler
+    - cobbler-web
+    - dhcp
+    - tftp-server
+    - xinetd
+    - httpd
+    - pykickstart
+    - debmirror
+    - syslinux
+    - cman
+    - fence-agents
+
+
+

@@ -1,0 +1,52 @@
+---
+# auther: serialt
+
+- name: Configure YUM.
+  template:
+    src: zabbix.repo.j2
+    dest: /etc/yum.repos.d/zabbix.repo
+    mode: 644
+
+
+- name: Install zabbix server.
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - zabbix-server-mysql
+    - zabbix-agent
+
+- name: Ready to install zabbix frontend.
+  yum: 
+    name: centos-release-scl
+    state: present
+
+- name: Install zabbix frontend
+  yum:
+    name: "{{ item }}" 
+    state: present
+  loop:
+    - zabbix-web-mysql-scl
+    - zabbix-nginx-conf-scl
+
+- name: Configure db password  of zabbix server.
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    reg
+
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+

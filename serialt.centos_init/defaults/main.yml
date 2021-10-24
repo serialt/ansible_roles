@@ -1,0 +1,6 @@
+---
+# defaults file for centos_init
+
+# 安装python
+python_package_state: 'yes'
+python_package_dev: 'yes'

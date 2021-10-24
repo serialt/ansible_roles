@@ -1,0 +1,9 @@
+- hosts: serialt
+  become: yes
+  become_user: root
+  roles:
+    #- role: serialt.centos_init
+    #- role: serialt.docker
+    - role: zabbix-agent
+    #- role: serialt.kernel
+   # - role: zabbix-server

@@ -1,0 +1,93 @@
+---
+# tasks file for centos_init
+
+- name: 关闭selinux
+  selinux:
+    state: disabled 
+  tags: disable_selinux
+  ignore_errors: yes
+
+- name: 停止selinux
+  shell: setenforce 0
+  tags: stop_slinux
+  ignore_errors: yes
+
+- name: stop firewalld
+  systemd:
+    name: firewalld
+    state: disabled
+    enabled: no
+  ignore_errors: yes
+  
+
+- name: 删除已存在的yum源
+  shell: "rm -rf ./*.repo "
+  args:
+    chdir: "/etc/yum.repos.d/"
+
+
+- name: "安装阿里云yum源"
+  get_url: 
+    url: https://mirrors.aliyun.com/repo/Centos-7.repo
+    dest: '/etc/yum.repos.d/aliyun.repo'
+    owner: root
+    group: root
+    mode: 0644
+  tags: install_aliyun_yum
+
+- name: "修改阿里云yum源"
+  shell: "sed -i -e '/mirrors.cloud.aliyuncs.com/d' -e '/mirrors.aliyuncs.com/d' /etc/yum.repos.d/aliyun.repo"
+
+- name: "安装阿里云epel-relase"
+  yum_repository:
+    file: aliyun-epel
+    name: "epel"
+    description: "Extra Packages for Enterprise Linux 7 - $basearch"
+    baseurl: "http://mirrors.aliyun.com/epel/7/$basearch"
+    gpgkey: "https://mirrors.aliyun.com/epel/RPM-GPG-KEY-EPEL-7"
+    gpgcheck: yes
+    enabled: yes
+  tags: install_aliyun-epel
+
+- name: 配置sshd
+  shell: "sed -i -e '/UseDNS/cUseDNS no' sshd_config  -e '/GSSAPIAuthentication/cGSSAPIAuthentication no' sshd_config"
+  args:
+    chdir: "/etc/ssh/"
+
+- name: 调整时区
+  shell: timedatectl set-timezone "Asia/Shanghai"
+
+- name: 安装常用软件
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - bash-completion
+    - vim-enhanced
+    - net-tools
+    - lrzsz
+    - lftp
+    - wget
+    - chrony
+
+- name: 重启服务管理
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - chronyd
+    - sshd
+
+- name: 优化history
+  script: history.sh
+
+- name: 升级系统软件
+  shell: yum upgrade -y
+
+- include_tasks: python.yml
+  when: python_package_state == 'yes'
+
+
+
+  

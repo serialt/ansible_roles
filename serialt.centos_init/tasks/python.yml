@@ -1,0 +1,16 @@
+- name: install python
+  yum: 
+    name: python3
+    state: present
+
+- name: 配置pip源
+  template:
+    src: pip.conf.j2
+    dest: /etc/pip.conf
+
+
+- name: install python3-dev
+  yum: 
+    name: python3-devel
+    state: present
+  when: python_package_dev == 'yes'

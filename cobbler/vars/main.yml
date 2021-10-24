@@ -1,0 +1,26 @@
+---
+# vars file for cobbler
+
+# cobbler服务器ip
+SERVER_IP: 192.168.122.12
+
+# cobbler服务器网段
+SERVER_NET: 192.168.122.0 
+
+# dpch信息
+DHCP_BEGIN: 192.168.122.100
+DHCP_END: 192.168.122.200
+
+# dpch网段
+DHCP_SUBNET: 192.168.122.0
+
+# dpch网关
+DHCP_ROUTER: 192.168.122.2
+
+# 指定dns
+DHCP_DNS: 223.5.5.5
+
+
+
+# 装机后服务器的root密码
+ROOT_PASSWORD: centos

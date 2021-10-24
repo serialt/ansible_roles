@@ -1,0 +1,4 @@
+- hosts: serialt
+  gather_facts: false
+  roles:
+    - role: cobbler

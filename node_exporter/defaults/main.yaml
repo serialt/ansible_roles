@@ -1,0 +1,20 @@
+---
+# See available releases: https://github.com/prometheus/node_exporter/releases/
+
+node_exporter_bin_path: /usr/local/bin/node_exporter
+
+node_exporter_options: ''
+
+node_exporter_state: started
+node_exporter_enabled: true
+
+
+# node_exporter file 
+node_exporter_gzip_filepath:  '/usr/local/src/'
+
+node_exporter_filename: node_exporter-1.1.2.linux-amd64 
+node_exporter_gzip_filename: "{{ node_exporter_filename }}.tar.gz"
+
+
+
+

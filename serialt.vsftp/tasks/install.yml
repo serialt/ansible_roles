@@ -1,0 +1,9 @@
+# serialt
+
+- name: install | Ensure vsftpd packages are installed.
+  package: 
+    name: "{{ item }}"
+     state: "{{ vsftp_installe_state }}"
+  with_items: "{{ vsftpd_packages }}"
+
+

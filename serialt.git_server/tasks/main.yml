@@ -1,0 +1,63 @@
+---
+# tasks file for serialt.git_server
+
+- name: 卸载已安装的git
+  yum:
+    name: git
+    state: absent
+  register: remove_git
+  ignore_errors: yes
+
+- name: install git 
+  yum:
+    name: git
+    state: present
+
+- name: create group of git
+  group:
+    name: git
+    state: present
+
+- name: create user of git
+  user: 
+    name: git
+    state: present
+    group: git
+    home: "{{ git_server_home}}"
+
+#- name: ssh-keygen
+#  shell: ssh-keygen -t rsa -f ~/.ssh/id_rsa -N '' -C 'serialt@126.com'
+#  become: yes
+#  become_user: git
+
+- name: 等待2秒
+  shell: sleep 2
+
+- name: 创建存放git认证公钥的目录
+  file:
+    path: ~/.ssh
+    state: directory
+    mode: 600
+
+- name: 创建存放git认证公钥的文件
+  shell: touch ~/.ssh/authorized_keys
+  ignore_errors: yes 
+  become: yes
+  become_user: git
+
+- name: 创建裸仓库
+  shell: git init --bare "{{ item }}"
+  args:
+    chdir: ~/
+  become: yes
+  become_user: git
+  with_items: "{{ git_bare_repo_name }}"  
+
+- name: 修改git的shell类型
+  shell: sed -r "#^git#/bin/bash#/usr/local/git/bin/git-shell#" /etc/passwd
+  register: change_git_shell
+- debug:
+    var: change_git_shell
+
+
+  

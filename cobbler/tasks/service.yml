@@ -1,0 +1,19 @@
+- name: 启动服务
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  with_items:
+    - dhcpd
+    - xinetd
+    - cobblerd
+
+- name: cobbler get-loaders
+  shell: "{{ item }}"
+  with_items:
+    - cobbler get-loaders
+
+- name: 同步服务
+  shell: cobbler sync
+
+

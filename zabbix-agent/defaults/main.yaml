@@ -1,0 +1,11 @@
+
+
+zabbix_repo_url: "https://mirrors.tuna.tsinghua.edu.cn"
+zabbix_agent_version: "5.0"
+# zabbix-agent go版本
+zabbix_agent_go: "False"
+
+
+zabbix_server: "zabbix-server.serialt.com"
+
+

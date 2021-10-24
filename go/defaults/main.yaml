@@ -1,0 +1,24 @@
+---
+# author: serialt
+
+software_files_path: "/usr/local/src"
+software_install_path: "/usr/local"
+
+go_version: "1.16.4"
+go_file: "go{{ go_version }}.linux-amd64.tar.gz"
+go_file_path: "{{ software_files_path }}/{{ go_file }}"
+go_file_url: "https://studygolang.com/dl/golang/{{ go_file }}"
+
+
+
+# 环境变量配置
+go_proxy: "export GOPROXY=https://goproxy.cn,direct"
+#go_proxy: "export GOPROXY https://mirrors.aliyun.com/goproxy"
+go_root: "export GOROOT={{ software_files_path }}/go"
+go_env_path: 'export PATH=$PATH:$GOROOT/bin'
+
+#配置GOPATH
+go_path: "export GOPATH=/root/go"
+
+
+

@@ -1,0 +1,63 @@
+
+- name: uninstall zabbix-agent if installed.
+  yum:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - zabbix-agent
+    - zabbix-release
+  ignore_errors: True
+
+- name: configure tsinghua yum.
+  shell: rpm -ivh {{ zabbix_repo_url }}/zabbix/zabbix/{{ zabbix_agent_version }}/rhel/{{ ansible_distribution_major_version }}/x86_64/zabbix-release-{{ zabbix_agent_version }}-1.el7.noarch.rpm
+  
+- name: modify zabbix yum.
+  shell: sed -ri "s#http://repo.zabbix.com#{{ zabbix_repo_url }}/zabbix#g" /etc/yum.repos.d/zabbix.repo
+
+- name: update yum.
+  shell: yum clean all && yum repolist
+
+- name: install zabbix-agent.
+  yum:
+    name: zabbix-agent
+    state: present
+  when: zabbix_agent_go == "False"
+
+- name: install zabbix-agent with go version.
+  yum:
+    name: zabbix-agent2
+    state: present
+  when: zabbix_agent_go == "True"
+
+- name: configure zabbix-agent for zabbix-server.
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: '^Server=127.0.0.1'
+    line: "Server={{ zabbix_server }}"
+
+- name: configure zabbix-agent ServerActive for zabbix-server.
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: '^ServerActive=127.0.0.1'
+    line: "ServerActive={{ zabbix_server }}"
+
+- name: configure zabbix-agent hostname.
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: '^Hostname='
+    line: "Hostname={{ ansible_hostname }}"
+
+- name: start zabbix-agent.
+  systemd:
+    name: zabbix-agent
+    enabled: yes
+    state: restarted
+
+- debug:
+    msg: "zabbix agent配置完成"
+
+
+    
+
+  
+

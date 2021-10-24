@@ -1,0 +1,64 @@
+- name: Check current node_exporter version.
+  shell: "{{ node_exporter_bin_path }} --version"
+  failed_when: false
+  changed_when: false
+  register: node_exporter_version_check
+
+- name: Check gzip file local.
+  stat:
+    path: "{{ node_exporter_gzip_filepath }}/{{ node_exporter_gzip_filename }}"
+  connection: local
+  register: node_exporter_gzip_file
+
+- fail: 
+    msg: node_exporter file not exits
+  when: node_exporter_gzip_file.stat.exists == false 
+
+- name: Distribute gzip file.
+  unarchive:
+    src: "{{ node_exporter_gzip_filepath }}/{{ node_exporter_gzip_filename }}"
+    dest: "{{ node_exporter_gzip_filepath }}"
+
+- name: Move node_exporter node_exporter into place.
+  copy: 
+    src: "{{ node_exporter_gzip_filepath }}/{{ node_exporter_filename }}/node_exporter"
+    dest: "{{ node_exporter_bin_path }}"
+    mode: 755
+    remote_src: true
+  notify: restart node_exporter
+
+- name: Create node_exporter user.
+  user:
+    name: node_exporter
+    shell: /sbin/nologin
+    state: present
+    create_home: false
+
+- name: Copy the node_exporter systemd unit file.
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    mode: 0644
+  register: node_exporter_service
+
+- name: Reload systemd deamon if unit file is changed.
+  systemd:
+    daemon_reload: yes
+  notify: restart node_exporter
+  when: node_exporter_service is changed
+
+- name: Ensure node_exporter is running and enabled at boot.
+  systemd:
+    name: node_exporter
+    state: "{{ node_exporter_state }}"
+    enabled: "{{ node_exporter_enabled }}"
+  
+- name: Verufy node_exporter is responding to requests.
+  uri:
+    url: http://localhost:9100
+    return_content: true
+  register: metrics_output
+  failed_when: "'Metrics' not in metrics_output.content"
+
+- debug:
+    msg: node_exporter installed succeed
